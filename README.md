@@ -199,22 +199,7 @@ This is a frontend assignment. The mock layer (`mockData.js`) simulates realisti
 
 ---
 
-## 📦 Deployment
 
-### Deploy to Vercel (Recommended)
-
-1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com) → Import Project
-3. Select your GitHub repository
-4. Vercel auto-detects Vite — click **Deploy**
-5. Done! Your app is live in ~30 seconds
-
-### Deploy to Netlify
-
-```bash
-npm run build
-# Upload /dist folder to Netlify, or connect GitHub repo
-```
 
 ---
 

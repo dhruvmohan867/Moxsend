@@ -1,30 +1,50 @@
-.stats-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.steps-bar {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
-  margin-top: var(--space-2);
 }
 
-.stat-item {
+.steps-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.steps-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.step-group {
+  display: flex;
+  align-items: center;
+}
+
+.step-card {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: rgba(22, 22, 31, 0.6);
+  background: rgba(22, 22, 31, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   cursor: default;
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-base);
+  min-width: 180px;
 }
 
-.stat-item:hover {
+.step-card:hover {
   border-color: var(--color-border-hover);
-  background: rgba(28, 28, 40, 0.8);
 }
 
-.stat-icon {
+.step-icon {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-md);
@@ -34,39 +54,76 @@
   flex-shrink: 0;
 }
 
-.stat-content {
+.step-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
-.counter-value {
-  font-size: var(--font-size-lg);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: white;
-  font-variant-numeric: tabular-nums;
+.step-number {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
 }
 
-.stat-label {
+.step-title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.step-desc {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  font-weight: 500;
   white-space: nowrap;
 }
 
+/* Connector line between steps */
+.step-connector {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  position: relative;
+}
+
+.connector-line {
+  width: 28px;
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+
+.connector-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.6;
+}
+
+/* Responsive */
 @media (max-width: 900px) {
-  .stats-bar {
-    grid-template-columns: repeat(2, 1fr);
+  .steps-flow {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: center;
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .step-card {
+    min-width: calc(50% - var(--space-2));
   }
 }
 
 @media (max-width: 480px) {
-  .stats-bar {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-item {
-    padding: var(--space-3) var(--space-4);
+  .step-card {
+    min-width: 100%;
   }
 }

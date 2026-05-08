@@ -2,131 +2,142 @@ import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { TrendingUp, Users, Mail, Zap } from 'lucide-react';
+import { PenLine, Sparkles, MailCheck, RefreshCw } from 'lucide-react';
 import './StatsBar.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const stats = [
+const steps = [
   {
-    icon: Mail,
-    value: 12847,
-    suffix: '+',
-    label: 'Emails Generated',
+    icon: PenLine,
+    step: '01',
+    title: 'Describe',
+    desc: 'Your product & audience',
     color: '#7c3aed',
   },
   {
-    icon: TrendingUp,
-    value: 320,
-    suffix: '%',
-    label: 'Higher Reply Rates',
-    color: '#10b981',
-  },
-  {
-    icon: Users,
-    value: 940,
-    suffix: '+',
-    label: 'Active Teams',
+    icon: Sparkles,
+    step: '02',
+    title: 'Generate',
+    desc: '3 AI email variations',
     color: '#3b82f6',
   },
   {
-    icon: Zap,
-    value: 98,
-    suffix: '%',
-    label: 'Time Saved',
+    icon: MailCheck,
+    step: '03',
+    title: 'Preview',
+    desc: 'Subject, body & personalization',
+    color: '#10b981',
+  },
+  {
+    icon: RefreshCw,
+    step: '04',
+    title: 'Iterate',
+    desc: 'Improve with one click',
     color: '#f59e0b',
   },
 ];
 
-function StatCard({ stat, index }) {
-  const counterRef = useRef(null);
-  const cardRef = useRef(null);
+export default function StatsBar() {
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    const el = counterRef.current;
-    const card = cardRef.current;
-    if (!el || !card) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-    // GSAP ScrollTrigger — animate counter when card scrolls into view
-    const obj = { val: 0 };
-    const tween = gsap.to(obj, {
-      val: stat.value,
-      duration: 2,
-      delay: index * 0.15,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: card,
-        start: 'top 85%',
-        toggleActions: 'play none none none',
-      },
-      onUpdate: () => {
-        el.textContent = Math.floor(obj.val).toLocaleString() + stat.suffix;
-      },
-    });
+    const ctx = gsap.context(() => {
+      // GSAP ScrollTrigger — stagger cards in
+      const cards = el.querySelectorAll('.step-card');
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 35, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.12,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            toggleActions: 'play none none none',
+          },
+        }
+      );
 
-    // GSAP — card entrance from below with scale
-    gsap.fromTo(
-      card,
-      { opacity: 0, y: 40, scale: 0.95 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.7,
-        delay: index * 0.12,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: card,
-          start: 'top 90%',
-          toggleActions: 'play none none none',
-        },
-      }
-    );
+      // GSAP — animate connector lines
+      const connectors = el.querySelectorAll('.step-connector');
+      gsap.fromTo(
+        connectors,
+        { scaleX: 0, transformOrigin: 'left center' },
+        {
+          scaleX: 1,
+          duration: 0.5,
+          stagger: 0.15,
+          delay: 0.3,
+          ease: 'power3.inOut',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            toggleActions: 'play none none none',
+          },
+        }
+      );
+    }, el);
 
-    return () => {
-      tween.kill();
-      ScrollTrigger.getAll().forEach((t) => {
-        if (t.trigger === card) t.kill();
-      });
-    };
-  }, [stat, index]);
-
-  const Icon = stat.icon;
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <motion.div
-      ref={cardRef}
-      className="stat-item"
-      whileHover={{ scale: 1.05, y: -6 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-    >
-      <div
-        className="stat-icon"
-        style={{
-          background: `${stat.color}15`,
-          color: stat.color,
-          boxShadow: `0 0 20px ${stat.color}20`,
-        }}
-      >
-        <Icon size={18} />
-      </div>
-      <div className="stat-content">
-        <span ref={counterRef} className="counter-value">
-          0{stat.suffix}
-        </span>
-        <span className="stat-label">{stat.label}</span>
-      </div>
-    </motion.div>
-  );
-}
+    <div className="steps-bar" id="steps-bar" ref={containerRef}>
+      <div className="steps-label">How it works</div>
+      <div className="steps-flow">
+        {steps.map((step, idx) => {
+          const Icon = step.icon;
+          return (
+            <div key={step.step} className="step-group">
+              <motion.div
+                className="step-card"
+                whileHover={{ y: -6, scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <div
+                  className="step-icon"
+                  style={{
+                    background: `${step.color}12`,
+                    color: step.color,
+                    boxShadow: `0 0 20px ${step.color}15`,
+                  }}
+                >
+                  <Icon size={18} />
+                </div>
+                <div className="step-content">
+                  <div className="step-number" style={{ color: step.color }}>
+                    {step.step}
+                  </div>
+                  <div className="step-title">{step.title}</div>
+                  <div className="step-desc">{step.desc}</div>
+                </div>
+              </motion.div>
 
-export default function StatsBar() {
-  return (
-    <div className="stats-bar" id="stats-bar">
-      {stats.map((stat, idx) => (
-        <StatCard key={stat.label} stat={stat} index={idx} />
-      ))}
+              {/* Connector line between steps */}
+              {idx < steps.length - 1 && (
+                <div className="step-connector">
+                  <div
+                    className="connector-line"
+                    style={{
+                      background: `linear-gradient(90deg, ${step.color}40, ${steps[idx + 1].color}40)`,
+                    }}
+                  ></div>
+                  <div className="connector-dot" style={{ background: step.color }}></div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

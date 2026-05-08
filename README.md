@@ -6,7 +6,7 @@
 
 ## 🎯 Live Demo
 
-🔗 **[View Live on Vercel →](https://moxsend-delta.vercel.app/)**
+🔗 **[View Live on Vercel ](https://moxsend-delta.vercel.app/)**
 
 ---
 

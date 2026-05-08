@@ -34,10 +34,19 @@
   margin: 0 auto;
 }
 
+.feature-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), #ec4899, transparent);
+  margin-bottom: var(--space-10);
+  border-radius: var(--radius-full);
+  opacity: 0.5;
+}
+
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-5);
+  perspective: 800px;
 }
 
 .feature-card {

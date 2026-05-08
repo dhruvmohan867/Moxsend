@@ -1,41 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TrendingUp, Users, Mail, Zap } from 'lucide-react';
 import './StatsBar.css';
 
-function AnimatedCounter({ end, duration = 2000, suffix = '', prefix = '' }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView) return;
-
-    let start = 0;
-    const startTime = Date.now();
-
-    const tick = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(eased * end);
-      setCount(current);
-
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      }
-    };
-
-    requestAnimationFrame(tick);
-  }, [end, duration, isInView]);
-
-  return (
-    <span ref={ref} className="counter-value">
-      {prefix}{count.toLocaleString()}{suffix}
-    </span>
-  );
-}
+gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
   {
@@ -47,11 +17,10 @@ const stats = [
   },
   {
     icon: TrendingUp,
-    value: 3.2,
-    suffix: 'x',
+    value: 320,
+    suffix: '%',
     label: 'Higher Reply Rates',
     color: '#10b981',
-    isDecimal: true,
   },
   {
     icon: Users,
@@ -69,51 +38,95 @@ const stats = [
   },
 ];
 
-export default function StatsBar() {
+function StatCard({ stat, index }) {
+  const counterRef = useRef(null);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const el = counterRef.current;
+    const card = cardRef.current;
+    if (!el || !card) return;
+
+    // GSAP ScrollTrigger — animate counter when card scrolls into view
+    const obj = { val: 0 };
+    const tween = gsap.to(obj, {
+      val: stat.value,
+      duration: 2,
+      delay: index * 0.15,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: card,
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      },
+      onUpdate: () => {
+        el.textContent = Math.floor(obj.val).toLocaleString() + stat.suffix;
+      },
+    });
+
+    // GSAP — card entrance from below with scale
+    gsap.fromTo(
+      card,
+      { opacity: 0, y: 40, scale: 0.95 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.7,
+        delay: index * 0.12,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 90%',
+          toggleActions: 'play none none none',
+        },
+      }
+    );
+
+    return () => {
+      tween.kill();
+      ScrollTrigger.getAll().forEach((t) => {
+        if (t.trigger === card) t.kill();
+      });
+    };
+  }, [stat, index]);
+
+  const Icon = stat.icon;
+
   return (
     <motion.div
-      className="stats-bar"
-      id="stats-bar"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.4 }}
+      ref={cardRef}
+      className="stat-item"
+      whileHover={{ scale: 1.05, y: -6 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
-      {stats.map((stat, idx) => {
-        const Icon = stat.icon;
-        return (
-          <motion.div
-            key={stat.label}
-            className="stat-item"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 + idx * 0.1 }}
-            whileHover={{ scale: 1.05, y: -4 }}
-          >
-            <div
-              className="stat-icon"
-              style={{
-                background: `${stat.color}15`,
-                color: stat.color,
-                boxShadow: `0 0 20px ${stat.color}20`,
-              }}
-            >
-              <Icon size={18} />
-            </div>
-            <div className="stat-content">
-              <AnimatedCounter
-                end={stat.isDecimal ? 32 : stat.value}
-                suffix={stat.suffix}
-                prefix={stat.isDecimal ? '' : ''}
-                duration={2000}
-              />
-              {stat.isDecimal && (
-                <span className="counter-value" style={{ display: 'none' }}></span>
-              )}
-              <span className="stat-label">{stat.label}</span>
-            </div>
-          </motion.div>
-        );
-      })}
+      <div
+        className="stat-icon"
+        style={{
+          background: `${stat.color}15`,
+          color: stat.color,
+          boxShadow: `0 0 20px ${stat.color}20`,
+        }}
+      >
+        <Icon size={18} />
+      </div>
+      <div className="stat-content">
+        <span ref={counterRef} className="counter-value">
+          0{stat.suffix}
+        </span>
+        <span className="stat-label">{stat.label}</span>
+      </div>
     </motion.div>
+  );
+}
+
+export default function StatsBar() {
+  return (
+    <div className="stats-bar" id="stats-bar">
+      {stats.map((stat, idx) => (
+        <StatCard key={stat.label} stat={stat} index={idx} />
+      ))}
+    </div>
   );
 }

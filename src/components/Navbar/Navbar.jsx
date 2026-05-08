@@ -1,35 +1,57 @@
+import { motion } from 'framer-motion';
 import { Zap, Mail, Sparkles } from 'lucide-react';
 import './Navbar.css';
 
 export default function Navbar({ activeTab, onTabChange }) {
   return (
-    <nav className="navbar" id="main-navbar">
+    <motion.nav
+      className="navbar"
+      id="main-navbar"
+      initial={{ y: -64, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+    >
       <div className="navbar-inner">
-        <div className="navbar-brand" id="navbar-brand">
-          <div className="navbar-logo">
+        <motion.div
+          className="navbar-brand"
+          id="navbar-brand"
+          whileHover={{ scale: 1.03 }}
+          transition={{ type: 'spring', stiffness: 400 }}
+        >
+          <motion.div
+            className="navbar-logo"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          >
             <Zap size={20} />
-          </div>
+          </motion.div>
           <span className="navbar-title">Moxsend</span>
           <span className="navbar-badge">AI</span>
-        </div>
+        </motion.div>
 
         <div className="navbar-tabs" id="navbar-tabs">
-          <button
+          <motion.button
             className={`navbar-tab ${activeTab === 'generate' ? 'active' : ''}`}
             onClick={() => onTabChange('generate')}
             id="tab-generate"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
             <Sparkles size={16} />
             <span>Generate</span>
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             className={`navbar-tab ${activeTab === 'csv' ? 'active' : ''}`}
             onClick={() => onTabChange('csv')}
             id="tab-csv"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
             <Mail size={16} />
             <span>Bulk CSV</span>
-          </button>
+          </motion.button>
         </div>
 
         <div className="navbar-end">
@@ -39,6 +61,6 @@ export default function Navbar({ activeTab, onTabChange }) {
           </div>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 }

@@ -10,14 +10,6 @@
 
 ---
 
-## 📸 Preview
-
-| Landing Page | Email Generation | Before/After Iteration |
-|---|---|---|
-| Hero section with 3D particle background | 3 email variations with copy buttons | Side-by-side comparison after AI improvement |
-
----
-
 ## ✅ Feature Checklist (All Requirements Met)
 
 | # | Requirement | Status | Implementation Details |
@@ -38,11 +30,25 @@
 |-------|-----------|-----|
 | **Framework** | React 19 + Vite 8 | Fast HMR, modern JSX transform, instant dev server |
 | **3D Background** | Three.js + @react-three/fiber + @react-three/drei | Interactive particle field, floating wireframe geometries, starfield — all mouse-reactive |
-| **Animations** | Framer Motion | Staggered reveals, page transitions, hover effects, scroll-triggered animations |
+| **Animations (Interactive)** | Framer Motion | Page transitions (AnimatePresence), hover/tap springs, drag, staggered entrance |
+| **Animations (Scroll)** | GSAP + ScrollTrigger | Scroll-driven parallax, text reveals, staggered card entrances, scrub effects |
 | **Icons** | Lucide React | Consistent, tree-shakeable icon set (only imports what's used) |
 | **CSV Upload** | react-dropzone | Drag-and-drop file upload with validation |
 | **Styling** | Vanilla CSS (custom design system) | Full control over design tokens, no framework lock-in |
 | **Fonts** | Inter (Google Fonts) | Professional, highly legible, variable weight support |
+
+### Framer Motion vs GSAP — Clear Separation of Concerns
+
+| Animation Type | Library | Why |
+|---------------|---------|-----|
+| **Page transitions** (tab switch, enter/exit) | Framer Motion `AnimatePresence` | CSS/GSAP can't animate elements leaving the DOM |
+| **Hover & tap** (buttons, cards, badges) | Framer Motion `whileHover` / `whileTap` | Declarative, prop-based — cleaner than event listeners |
+| **Hero parallax** (title fades on scroll) | GSAP ScrollTrigger `scrub` | Scrub-linked scroll — GSAP's `scrub` is unmatched |
+| **Scroll reveals** (stats, features, emails) | GSAP ScrollTrigger `toggleActions` | Staggered children + precise `start/end` positioning |
+| **3D tilt on hover** (email cards) | GSAP `rotateX/Y` | Sub-pixel smooth with `transformPerspective` |
+| **Magnetic hover** (Generate button) | GSAP with mouse events | Elastic snap-back via `elastic.out` easing |
+| **Counter animation** (stats numbers) | GSAP ScrollTrigger `onUpdate` | Frame-perfect number interpolation on scroll |
+| **Comparison slide-in** (before/after) | GSAP ScrollTrigger | Before from left, after from right, arrow with `back.out` |
 
 ---
 
@@ -51,44 +57,49 @@
 ```
 src/
 ├── main.jsx                              # App entry point
-├── index.css                             # Design system (tokens, reset, animations)
-├── App.jsx                               # Main orchestrator — state, routing, layout
+├── index.css                             # Design system (tokens, reset, keyframes)
+├── App.jsx                               # Main orchestrator — GSAP + Framer Motion
 ├── App.css                               # Layout, hero, skeletons, footer
+│
+├── hooks/
+│   └── useGsap.js                        # 🎯 Custom GSAP hooks (scroll reveal, stagger,
+│                                         #    parallax, text reveal, magnetic hover,
+│                                         #    line reveal, scroll counter)
 │
 ├── utils/
 │   └── mockData.js                       # Mock AI backend (template engine, CSV parser)
 │
 └── components/
-    ├── ThreeBackground/                  # 🎨 Three.js 3D animated background
-    │   ├── ThreeBackground.jsx           #    Particles, orbs, wireframes, starfield
+    ├── ThreeBackground/                  # 🎨 Three.js — 3D particle field + floating
+    │   ├── ThreeBackground.jsx           #    geometries + mouse-reactive orbs + starfield
     │   └── ThreeBackground.css
     │
-    ├── Navbar/                           # 🧭 Top navigation with tab switching
-    │   ├── Navbar.jsx                    #    Generate / Bulk CSV tabs
+    ├── Navbar/                           # 🧭 Framer Motion — slide-in entrance, logo
+    │   ├── Navbar.jsx                    #    wobble, spring hover tabs
     │   └── Navbar.css
     │
-    ├── StatsBar/                         # 📊 Animated counters (social proof)
-    │   ├── StatsBar.jsx                  #    12,847+ emails, 3.2x reply rate, etc.
+    ├── StatsBar/                         # 📊 GSAP ScrollTrigger — counter animations
+    │   ├── StatsBar.jsx                  #    + Framer Motion spring hover cards
     │   └── StatsBar.css
     │
-    ├── InputSection/                     # ✏️ Product description input + generate
-    │   ├── InputSection.jsx              #    Textarea, validation, char counter
+    ├── InputSection/                     # ✏️ GSAP — magnetic button hover, pulse on
+    │   ├── InputSection.jsx              #    click + Framer Motion AnimatePresence error
     │   └── InputSection.css
     │
-    ├── EmailCard/                        # 📧 Single email variation display
-    │   ├── EmailCard.jsx                 #    Subject, personalized line, body + copy
+    ├── EmailCard/                        # 📧 GSAP — 3D tilt on hover, green flash on
+    │   ├── EmailCard.jsx                 #    copy + Framer Motion spring buttons
     │   └── EmailCard.css
     │
-    ├── ComparisonView/                   # 🔄 Before/After iteration comparison
-    │   ├── ComparisonView.jsx            #    Side-by-side with green highlights
+    ├── ComparisonView/                   # 🔄 GSAP ScrollTrigger — before slides left,
+    │   ├── ComparisonView.jsx            #    after slides right, arrow back.out entrance
     │   └── ComparisonView.css
     │
-    ├── FeatureShowcase/                  # ✨ Feature cards grid (Why Moxsend)
-    │   ├── FeatureShowcase.jsx           #    6 animated feature cards
+    ├── FeatureShowcase/                  # ✨ GSAP ScrollTrigger — stagger cards with
+    │   ├── FeatureShowcase.jsx           #    rotateX + Framer Motion hover lift
     │   └── FeatureShowcase.css
     │
-    └── CSVUpload/                        # 📤 Bulk CSV upload + generation
-        ├── CSVUpload.jsx                 #    Dropzone, table preview, accordion results
+    └── CSVUpload/                        # 📤 react-dropzone + Framer Motion
+        ├── CSVUpload.jsx                 #    drag-and-drop, accordion email results
         └── CSVUpload.css
 ```
 
@@ -131,32 +142,28 @@ npm run preview   # Preview production build locally
 Cold email tools are used by sales professionals who often work long hours. A dark theme reduces eye strain, feels premium, and provides better contrast for reading email content.
 
 ### Why Three.js Background?
-The 3D particle field creates an immediate "wow" factor that differentiates Moxsend from generic SaaS tools. The particles respond to mouse movement, making the interface feel alive. Performance is optimized with:
+The 3D particle field creates an immediate "wow" factor. The particles respond to mouse movement, making the interface feel alive. Performance is optimized with:
 - Reduced particle count (500 vs thousands)
 - `AdditiveBlending` for GPU-efficient rendering
 - `dpr` capped at 1.5 to prevent GPU overload
 - `Suspense` fallback for graceful loading
 
-### Why Framer Motion Instead of CSS Animations?
-- **AnimatePresence** enables exit animations (CSS can't animate elements leaving the DOM)
-- **Staggered children** for sequential email card reveals
-- **Gesture support** (whileHover, whileTap) for micro-interactions
-- **Scroll-triggered** animations via `whileInView`
+### Why Both Framer Motion AND GSAP?
+They solve different problems:
+- **Framer Motion** excels at React-integrated, declarative animations — especially `AnimatePresence` (animating unmounting components), gesture props (`whileHover`, `whileTap`), and layout animations. No other library can do this as cleanly in React.
+- **GSAP + ScrollTrigger** is the industry standard for scroll-driven animations — `scrub` (linking animation progress to scroll position), `pin`, staggered timelines, and physics-based easing like `elastic.out` and `back.out`. ScrollTrigger's precision with `start/end` positions is unmatched.
+
+Using both avoids the trap of forcing one library to do everything poorly.
 
 ### Why Mock Data Instead of Real API?
-This is a frontend assignment. The mock layer (`mockData.js`) simulates realistic API behavior with:
-- Configurable latency (2.2s generate, 1.8s improve)
-- Template-based personalization engine
-- CSV parsing with flexible column matching
-- Multiple variation support
-
-**Replacing with a real API** requires changing only 3 functions in `mockData.js` — the entire UI is API-agnostic.
+This is a frontend assignment. The mock layer (`mockData.js`) simulates realistic API behavior with configurable latency, template-based personalization, CSV parsing, and multiple variation support. **Replacing with a real API** requires changing only 3 functions — the entire UI is API-agnostic.
 
 ### Component Design Principles
 1. **Single Responsibility** — Each component owns one piece of UI
 2. **Props Down, Events Up** — State lives in App.jsx, children emit callbacks
-3. **CSS Modules Pattern** — Each component has co-located `.css` file, no global conflicts
-4. **Accessibility** — `role="alert"` on errors, `aria-label` on icon buttons, keyboard navigable
+3. **CSS Modules Pattern** — Co-located `.css` files, no global conflicts
+4. **GSAP Cleanup** — All GSAP contexts use `ctx.revert()` for proper React cleanup
+5. **Accessibility** — `role="alert"` on errors, `aria-label` on icon buttons
 
 ---
 
@@ -216,11 +223,13 @@ npm run build
 | Feature | UX Detail |
 |---------|-----------|
 | **Input validation** | Min 20 characters, real-time counter, inline error with icon |
-| **Button states** | Disabled when empty, loading spinner during generation |
-| **Copy feedback** | "Copy" → "Copied ✓" with green state, auto-resets after 2s |
-| **Collapsible cards** | Each email card can collapse to reduce scroll fatigue |
-| **Skeleton loading** | 3 shimmer cards + "AI is crafting..." label during generation |
-| **Tab transitions** | Smooth AnimatePresence fade between Generate and CSV tabs |
+| **Button states** | Disabled when empty, GSAP magnetic hover, Framer Motion spring tap |
+| **Copy feedback** | "Copy" → "Copied ✓" with green flash (GSAP boxShadow), auto-resets 2s |
+| **3D card tilt** | GSAP rotateX/Y on mouse move, elastic snap-back on leave |
+| **Skeleton loading** | Framer Motion staggered spring entrance + shimmer CSS |
+| **Scroll parallax** | Hero title fades + shrinks on scroll via GSAP `scrub: 1.5` |
+| **Counter animation** | GSAP ScrollTrigger counts from 0 to target on scroll entry |
+| **Tab transitions** | Framer Motion AnimatePresence with spring slide |
 | **CSV sample** | Download sample CSV button for users without a list ready |
 | **Responsive** | Full mobile support — stacked layouts, hidden nav labels |
 
